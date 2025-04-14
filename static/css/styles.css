@@ -1,0 +1,260 @@
+body {
+    margin-top: 20px;
+    background: linear-gradient(to bottom right, #f8fafc, #eef2f3);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.sidebar-nav {
+    padding: 0;
+    list-style: none;
+}
+
+.done {
+    color: green;
+}
+
+.not-done {
+    color: red;
+}
+
+.deadline {
+    color: darkred;
+}
+
+.tag-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  background-color: #007bff;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 5px;
+  text-decoration: none;
+}
+
+.add-btn:hover {
+  opacity: 0.85;
+}
+
+.update-btn {
+  background-color: #28a745;
+  color: white;
+  padding: 6px 15px;
+  border-radius: 5px;
+  text-decoration: none;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+  padding: 6px 15px;
+  border-radius: 5px;
+  text-decoration: none;
+}
+
+.update-btn:hover,
+.delete-btn:hover {
+  opacity: 0.85;
+}
+
+.tag-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.tag-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  background-color: #fff;
+  transition: box-shadow 0.3s ease;
+}
+
+.tag-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tag-name {
+  font-weight: 500;
+  font-size: 18px;
+}
+
+.tag-actions a {
+  margin-left: 10px;
+}
+
+.task-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.task-card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.3s ease;
+}
+
+.task-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.task-title {
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.task-meta {
+  margin-top: 5px;
+  color: #444;
+}
+
+.task-tags {
+  margin-top: 5px;
+  font-size: 14px;
+}
+
+.tag-pill {
+  background-color: #e2e8f0;
+  color: #1e293b;
+  padding: 3px 10px;
+  margin-left: 4px;
+  border-radius: 20px;
+  font-size: 12px;
+  align-items: center;
+  justify-content: center;
+  display: inline-flex;
+}
+
+.task-actions {
+  margin-top: 10px;
+}
+
+.task-card {
+  transition: box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+.task-card.not-done-task:hover {
+  background-color: #fff5f5;
+  box-shadow: 0 0 6px rgba(220, 53, 69, 0.3);
+}
+
+.task-card.done-task:hover {
+  background-color: #f3fff5;
+  box-shadow: 0 0 6px rgba(40, 167, 69, 0.3);
+}
+
+
+.content-wrapper {
+  max-width: 750px;
+  width: 100%;
+  padding: 50px;
+}
+
+.sidebar {
+  background-color: #f8f9fa;
+  height: 100vh;
+  padding: 20px 15px;
+  border-right: 1px solid #dee2e6;
+  position: sticky;
+  top: 0;
+  text-align: center;
+}
+
+.sidebar-nav {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.sidebar-nav li {
+  margin-bottom: 15px;
+}
+
+.sidebar-nav a {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  color: #007bff;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  font-weight: 500;
+}
+
+.sidebar-nav a:hover {
+  background-color: #e2e6ea;
+  color: #0056b3;
+}
+
+.sidebar-nav a.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.label {
+  text-align: left;
+}
+
+.icon {
+  font-size: 16px;
+}
+
+.task-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+.task-actions-left a {
+  margin-right: 10px;
+}
+
+.task-complete-btn {
+  text-align: right;
+}
+
+.complete-btn {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.complete-btn:hover {
+  background-color: #218838;
+}
+
+.complete-btn.undo {
+  background-color: #ffc107;
+  color: black;
+}
+
+.complete-btn.undo:hover {
+  background-color: #e0a800;
+}

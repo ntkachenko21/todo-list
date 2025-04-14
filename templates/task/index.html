@@ -1,10 +1,57 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}
+  <title>Task Manager</title>
+{% endblock title %}
+{% block content %}
+  <h1>TODO list</h1>
+  <br>
 
-</body>
-</html>
+  <div class="task-card-list">
+    <a href="{% url 'task:task-create' %}" class="btn add-btn">Add new task</a>
+    {% for task in tasks %}
+      <div class="task-card {% if task.is_done %}done-task{% else %}not-done-task{% endif %}">
+        <div class="task-title">
+          {{ task.content }}
+          <span class="{% if task.is_done %}done{% else %}not-done{% endif %}">
+             {% if task.is_done %}Done{% else %}Not done{% endif %}
+          </span>
+        </div>
+    
+        <div class="task-meta">
+          <small>
+            Created: {{ task.created_at }}
+            {% if task.deadline %}
+              <br>
+              <span class="deadline">Deadline: {{ task.deadline }}</span>
+            {% endif %}
+          </small>
+        </div>
+    
+        <div class="task-tags">
+          Tags:
+          {% for tag in task.tags.all %}
+            <span class="tag-pill">{{ tag.name }}</span>
+          {% endfor %}
+        </div>
+    
+        <div class="task-footer">
+          <div class="task-actions-left">
+            <a href="{% url 'task:task-update' task.id %}" class="update-btn">Update</a>
+            <a href="{% url 'task:task-delete' task.id %}" class="delete-btn">Delete</a>
+          </div>
+    
+          <div class="task-complete-btn">
+            <form action="{% url 'task:task-toggle-status' task.id %}" method="post">
+              {% csrf_token %}
+              {% if task.is_done %}
+                <button type="submit" class="complete-btn undo">Undo</button>
+              {% else %}
+                <button type="submit" class="complete-btn">Complete</button>
+              {% endif %}
+            </form>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock content %}

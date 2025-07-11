@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Edit Task - Task Manager</title>
+{% endblock title %}
+
+{% block content %}
+    <link rel="stylesheet" href="{% static 'css/form-styles.css' %}">
+    
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="fas fa-edit"></i>
+                Edit Task
+            </h1>
+            <p class="page-subtitle">Update your task details</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="window.location.href='{% url 'task:index' %}'">
+                <i class="fas fa-arrow-left"></i>
+                Back to Dashboard
+            </button>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <div class="form-card">
+            <form method="post" class="task-form" novalidate>
+                {% csrf_token %}
+                
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Task Details
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.content.id_for_label }}" class="form-label">
+                            <i class="fas fa-align-left"></i>
+                            Task Description
+                        </label>
+                        <div class="input-wrapper">
+                            <textarea name="{{ form.content.name }}" 
+                                      id="{{ form.content.id_for_label }}" 
+                                      class="form-control"
+                                      rows="4"
+                                      placeholder="Describe what needs to be done..."
+                                      required>{% if form.content.value %}{{ form.content.value }}{% endif %}</textarea>
+                        </div>
+                        {% if form.content.errors %}
+                            <div class="form-error">
+                                {% for error in form.content.errors %}
+                                    <span><i class="fas fa-exclamation-circle"></i> {{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-help">
+                            <i class="fas fa-lightbulb"></i>
+                            Be specific about what needs to be accomplished.
+                        </small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.deadline.id_for_label }}" class="form-label">
+                                <i class="fas fa-calendar-alt"></i>
+                                Deadline (Optional)
+                            </label>
+                            <div class="input-wrapper">
+                                <input type="datetime-local" 
+                                       name="{{ form.deadline.name }}" 
+                                       id="{{ form.deadline.id_for_label }}" 
+                                       class="form-control"
+                                       value="{% if form.deadline.value %}{{ form.deadline.value|date:'Y-m-d\TH:i' }}{% endif %}">
+                            </div>
+                            {% if form.deadline.errors %}
+                                <div class="form-error">
+                                    {% for error in form.deadline.errors %}
+                                        <span><i class="fas fa-exclamation-circle"></i> {{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.is_done.id_for_label }}" class="form-label">
+                                <i class="fas fa-check-circle"></i>
+                                Status
+                            </label>
+                            <div class="custom-checkbox-wrapper">
+                                <input type="checkbox" 
+                                       name="{{ form.is_done.name }}" 
+                                       id="{{ form.is_done.id_for_label }}" 
+                                       class="custom-checkbox"
+                                       {% if form.is_done.value %}checked{% endif %}>
+                                <label for="{{ form.is_done.id_for_label }}" class="custom-checkbox-label">
+                                    <span class="custom-checkmark"></span>
+                                    Mark as completed
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-tags"></i>
+                        Organization
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-tag"></i>
+                            Tags (Optional)
+                        </label>
+                        <div class="custom-tags-selection">
+                            {% for tag in form.tags.field.queryset %}
+                                <div class="custom-tag-option">
+                                    <input type="checkbox" 
+                                           name="{{ form.tags.name }}" 
+                                           value="{{ tag.pk }}" 
+                                           id="id_tags_{{ forloop.counter0 }}"
+                                           {% if tag in form.tags.value %}checked{% endif %}>
+                                    <label for="id_tags_{{ forloop.counter0 }}" class="custom-tag-label">
+                                        <i class="fas fa-tag"></i>
+                                        {{ tag.name }}
+                                        <span class="checkmark"></span>
+                                    </label>
+                                </div>
+                            {% empty %}
+                                <div class="no-tags-available">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>No tags available yet.</p>
+                                    <a href="{% url 'task:tag-create' %}" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-plus"></i>
+                                        Create your first tag
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if form.tags.errors %}
+                            <div class="form-error">
+                                {% for error in form.tags.errors %}
+                                    <span><i class="fas fa-exclamation-circle"></i> {{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-help">
+                            <i class="fas fa-lightbulb"></i>
+                            Tags help you organize and filter your tasks.
+                        </small>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'task:index' %}'">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Update Task
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        window.taskUpdateData = {
+            originalContent: "{{ object.content }}",
+            originalDeadline: "{% if object.deadline %}{{ object.deadline|date:'Y-m-d\TH:i' }}{% endif %}"
+        };
+    </script>
+    <script src="{% static 'js/task-update.js' %}"></script>
+{% endblock content %}

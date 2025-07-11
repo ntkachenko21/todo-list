@@ -1,57 +1,230 @@
 {% extends "base.html" %}
-{% block title %}
-  <title>Task Manager</title>
-{% endblock title %}
-{% block content %}
-  <h1>TODO list</h1>
-  <br>
 
-  <div class="task-card-list">
-    <a href="{% url 'task:task-create' %}" class="btn add-btn">Add new task</a>
-    {% for task in tasks %}
-      <div class="task-card {% if task.is_done %}done-task{% else %}not-done-task{% endif %}">
-        <div class="task-title">
-          {{ task.content }}
-          <span class="{% if task.is_done %}done{% else %}not-done{% endif %}">
-             {% if task.is_done %}Done{% else %}Not done{% endif %}
-          </span>
+{% block title %}
+    <title>Dashboard - Task Manager</title>
+{% endblock title %}
+
+{% block content %}
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="fas fa-clipboard-list"></i>
+                Task Dashboard
+            </h1>
+            <p class="page-subtitle">Manage your tasks efficiently</p>
         </div>
-    
-        <div class="task-meta">
-          <small>
-            Created: {{ task.created_at }}
-            {% if task.deadline %}
-              <br>
-              <span class="deadline">Deadline: {{ task.deadline }}</span>
-            {% endif %}
-          </small>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="window.location.href='{% url 'task:task-create' %}'">
+                <i class="fas fa-plus"></i>
+                Add New Task
+            </button>
         </div>
-    
-        <div class="task-tags">
-          Tags:
-          {% for tag in task.tags.all %}
-            <span class="tag-pill">{{ tag.name }}</span>
-          {% endfor %}
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">{{ total_tasks }}</h3>
+                <p class="stat-label">Total Tasks</p>
+            </div>
         </div>
-    
-        <div class="task-footer">
-          <div class="task-actions-left">
-            <a href="{% url 'task:task-update' task.id %}" class="update-btn">Update</a>
-            <a href="{% url 'task:task-delete' task.id %}" class="delete-btn">Delete</a>
-          </div>
-    
-          <div class="task-complete-btn">
-            <form action="{% url 'task:task-toggle-status' task.id %}" method="post">
-              {% csrf_token %}
-              {% if task.is_done %}
-                <button type="submit" class="complete-btn undo">Undo</button>
-              {% else %}
-                <button type="submit" class="complete-btn">Complete</button>
-              {% endif %}
-            </form>
-          </div>
+        
+        <div class="stat-card completed">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">{{ completed_tasks }}</h3>
+                <p class="stat-label">Completed</p>
+            </div>
         </div>
-      </div>
-    {% endfor %}
-  </div>
+        
+        <div class="stat-card pending">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">{{ pending_tasks }}</h3>
+                <p class="stat-label">Pending</p>
+            </div>
+        </div>
+        
+        <div class="stat-card overdue">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-number">{{ overdue_tasks }}</h3>
+                <p class="stat-label">Overdue</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">
+            <i class="fas fa-list"></i>
+            All Tasks ({{ total_tasks }})
+        </button>
+        <button class="filter-tab" data-filter="pending">
+            <i class="fas fa-clock"></i>
+            Pending ({{ pending_tasks }})
+        </button>
+        <button class="filter-tab" data-filter="completed">
+            <i class="fas fa-check"></i>
+            Completed ({{ completed_tasks }})
+        </button>
+        <button class="filter-tab" data-filter="overdue">
+            <i class="fas fa-exclamation-triangle"></i>
+            Overdue ({{ overdue_tasks }})
+        </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+        <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search tasks..." autocomplete="off">
+            <button class="search-clear" id="searchClear">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Tasks Container -->
+    <div class="tasks-container">
+        {% if tasks %}
+            <div class="task-grid" id="taskGrid">
+                {% for task in tasks %}
+                    <div class="task-card {% if task.is_done %}completed{% else %}pending{% endif %}"
+                         data-task-id="{{ task.id }}"
+                         data-status="{% if task.is_done %}completed{% else %}pending{% endif %}"
+                         data-deadline="{% if task.deadline %}{{ task.deadline|date:'Y-m-d' }}{% endif %}">
+                        
+                        <div class="task-header">
+                            <div class="task-status">
+                                <div class="status-indicator {% if task.is_done %}completed{% else %}pending{% endif %}">
+                                    <i class="fas {% if task.is_done %}fa-check-circle{% else %}fa-circle{% endif %}"></i>
+                                </div>
+                            </div>
+                            <div class="task-priority">
+                                {% if task.deadline %}
+                                    <span class="priority-badge" data-deadline="{{ task.deadline|date:'Y-m-d' }}">
+                                        <i class="fas fa-clock"></i>
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="task-content">
+                            <h3 class="task-title">
+                              {{ task.content|truncatechars:60 }}
+                            </h3>
+                            
+                            <div class="task-meta">
+                                <div class="meta-item">
+                                    <i class="fas fa-calendar-plus"></i>
+                                    <span>{{ task.created_at|date:"M d, Y" }}</span>
+                                </div>
+                                {% if task.deadline %}
+                                    <div class="meta-item deadline-info" data-deadline="{{ task.deadline|date:'Y-m-d' }}">
+                                        <i class="fas fa-calendar-times"></i>
+                                        <span>{{ task.deadline|date:"M d, Y" }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="task-tags">
+                                {% if task.tags.count %}
+                                    {% for tag in task.tags.all %}
+                                        {% if forloop.counter <= 5 %}
+                                            <a href="{% url 'task:tasks-by-tag' tag.pk %}" class="tag-pill">
+                                                <i class="fas fa-tag"></i>
+                                                {% if tag.name|length > 10 %}
+                                                    {{ tag.name|slice:":10" }}...
+                                                {% else %}
+                                                    {{ tag.name }}
+                                                {% endif %}
+                                            </a>
+                                        {% endif %}
+                                    {% endfor %}
+                                    {% if task.tags.count > 5 %}
+                                        <span class="tag-pill tag-pill-more">
+                                            <i class="fas fa-ellipsis-h"></i>
+                                            +{{ task.tags.count|add:"-5" }} more
+                                        </span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="no-tags">
+                                        <i class="fas fa-tag"></i>
+                                        No tags
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="task-actions">
+                            <div class="action-buttons">
+                                <a href="{% url 'task:task-detail' task.id %}" class="btn-icon btn-view" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <button class="btn-icon btn-edit" onclick="window.location.href='{% url 'task:task-update' task.id %}'" title="Edit Task">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon btn-delete" onclick="confirmDelete('{% url 'task:task-delete' task.id %}')" title="Delete Task">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            
+                            <form class="toggle-form" action="{% url 'task:task-toggle-status' task.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-toggle {% if task.is_done %}btn-undo{% else %}btn-complete{% endif %}">
+                                    {% if task.is_done %}
+                                        <i class="fas fa-undo"></i>
+                                        Undo
+                                    {% else %}
+                                        <i class="fas fa-check"></i>
+                                        Complete
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-clipboard-list"></i>
+                </div>
+                <h3>No tasks yet</h3>
+                <p>Create your first task to get started with organizing your work.</p>
+                <button class="btn btn-primary" onclick="window.location.href='{% url 'task:task-create' %}'">
+                    <i class="fas fa-plus"></i>
+                    Create First Task
+                </button>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Delete</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this task? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <a href="task_confirm_delete.html" class="btn btn-danger" id="confirmDeleteBtn">Delete</a>
+            </div>
+        </div>
+    </div>
 {% endblock content %}

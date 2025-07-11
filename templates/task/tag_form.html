@@ -1,12 +1,75 @@
 {% extends "base.html" %}
-{% load crispy_forms_tags crispy_forms_filters %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    <title>{% if object %}Edit Tag{% else %}Create Tag{% endif %} - Task Manager</title>
+{% endblock title %}
 
 {% block content %}
-  <h1>{{ object|yesno:"Update,Create" }} tag</h1>
-  <form action="" method="post" novalidate>
-    {% csrf_token %}
-    {{ form|crispy }}
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="fas {% if object %}fa-edit{% else %}fa-plus{% endif %}"></i>
+                {% if object %}Edit Tag{% else %}Create New Tag{% endif %}
+            </h1>
+            <p class="page-subtitle">
+                {% if object %}Update tag information{% else %}Add a new tag for organizing tasks{% endif %}
+            </p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="window.location.href='{% url 'task:tag-list' %}'">
+                <i class="fas fa-arrow-left"></i>
+                Back to Tags
+            </button>
+        </div>
+    </div>
 
-    <input type="submit" value="Submit" class="btn add-btn">
-  </form>
-{% endblock %}
+    <div class="form-container">
+        <div class="form-card">
+            <form method="post" class="tag-form" novalidate>
+                {% csrf_token %}
+                
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-tag"></i>
+                        Tag Information
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">
+                            <i class="fas fa-text-width"></i>
+                            Tag Name
+                        </label>
+                        <input type="text" 
+                               name="{{ form.name.name }}" 
+                               id="{{ form.name.id_for_label }}" 
+                               class="form-control{% if form.name.errors %} error{% endif %}"
+                               value="{% if form.name.value %}{{ form.name.value }}{% endif %}"
+                               placeholder="Enter tag name..."
+                               maxlength="63"
+                               required>
+                        {% if form.name.errors %}
+                            <div class="form-error">
+                                {% for error in form.name.errors %}
+                                    <span><i class="fas fa-exclamation-circle"></i> {{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <small class="form-help">Choose a descriptive name for your tag (e.g., "Work", "Personal", "Urgent")</small>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'task:tag-list' %}'">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas {% if object %}fa-save{% else %}fa-plus{% endif %}"></i>
+                        {% if object %}Update Tag{% else %}Create Tag{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

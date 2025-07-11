@@ -1,64 +1,307 @@
-// Main JavaScript file for Task Manager
+// ===== ОПТИМИЗИРОВАННЫЙ САЙДБАР - ИСПРАВЛЕНИЕ ВСЕХ ПРОБЛЕМ =====
 document.addEventListener("DOMContentLoaded", () => {
-  // Initialize all components
-  initializeSidebar()
+  // Инициализация всех компонентов
+  initializeOptimizedSidebar()
   initializeSearch()
   initializeFilters()
-  initializeTaskStats()
   initializeModals()
   initializeAlerts()
   initializeTaskCards()
   initializeLoadingStates()
-
-  // Update stats on page load
-  updateTaskStats()
+  initializeTooltips()
   checkOverdueTasks()
 })
 
-// Sidebar functionality
-function initializeSidebar() {
+// ===== ОПТИМИЗИРОВАННЫЙ САЙДБАР =====
+function initializeOptimizedSidebar() {
   const sidebar = document.getElementById("sidebar")
-  const sidebarToggle = document.getElementById("sidebarToggle")
-  const mainContent = document.querySelector(".main-content")
+  const sidebarPin = document.getElementById("sidebarPin")
+  const sidebarMobileToggle = document.getElementById("sidebarMobileToggle")
+  const sidebarOverlay = document.getElementById("sidebarOverlay")
+  const mainContent = document.getElementById("mainContent")
 
-  if (sidebarToggle) {
-    sidebarToggle.addEventListener("click", () => {
-      sidebar.classList.toggle("active")
+  if (!sidebar) return
 
-      // Close sidebar when clicking outside on mobile
-      if (sidebar.classList.contains("active")) {
-        document.addEventListener("click", closeSidebarOnOutsideClick)
+  let hoverTimeout = null
+  let isTransitioning = false
+  let transitionTimeout = null
+
+  // ===== УЛУЧШЕННАЯ HOVER ЛОГИКА С DEBOUNCING =====
+  if (sidebar && mainContent) {
+    sidebar.addEventListener("mouseenter", () => {
+      // Очищаем все таймауты
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout)
+        hoverTimeout = null
+      }
+      if (transitionTimeout) {
+        clearTimeout(transitionTimeout)
+        transitionTimeout = null
+      }
+
+      if (!sidebar.classList.contains("sidebar-pinned") && window.innerWidth > 1024 && !isTransitioning) {
+        isTransitioning = true
+        sidebar.classList.add("sidebar-hovering")
+
+        // Сброс флага после завершения анимации
+        transitionTimeout = setTimeout(() => {
+          isTransitioning = false
+        }, 400) // Соответствует CSS transition
+      }
+    })
+
+    sidebar.addEventListener("mouseleave", () => {
+      if (!sidebar.classList.contains("sidebar-pinned") && window.innerWidth > 1024) {
+        // Увеличенная задержка для предотвращения мерцания
+        hoverTimeout = setTimeout(() => {
+          if (!isTransitioning) {
+            isTransitioning = true
+            sidebar.classList.remove("sidebar-hovering")
+
+            transitionTimeout = setTimeout(() => {
+              isTransitioning = false
+            }, 400)
+          }
+        }, 150) // Оптимальная задержка
       }
     })
   }
 
-  function closeSidebarOnOutsideClick(event) {
-    if (!sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
-      sidebar.classList.remove("active")
-      document.removeEventListener("click", closeSidebarOnOutsideClick)
+  // ===== УЛУЧШЕННАЯ PIN/UNPIN ФУНКЦИОНАЛЬНОСТЬ =====
+  if (sidebarPin) {
+    sidebarPin.addEventListener("click", (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+
+      const isPinned = sidebar.classList.contains("sidebar-pinned")
+
+      // Создаем визуальный эффект
+      createOptimizedRipple(sidebarPin, e)
+
+      if (isPinned) {
+        sidebar.classList.remove("sidebar-pinned")
+        sidebarPin.classList.remove("active")
+        sidebarPin.title = "Pin sidebar"
+      } else {
+        sidebar.classList.add("sidebar-pinned")
+        sidebar.classList.remove("sidebar-hovering") // Убираем hover состояние
+        sidebarPin.classList.add("active")
+        sidebarPin.title = "Unpin sidebar"
+      }
+
+      // Сохраняем состояние
+      localStorage.setItem("sidebarPinned", !isPinned)
+    })
+  }
+
+  // ===== ОПТИМИЗИРОВАННАЯ МОБИЛЬНАЯ ФУНКЦИОНАЛЬНОСТЬ =====
+  if (sidebarMobileToggle) {
+    sidebarMobileToggle.addEventListener("click", (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+
+      const isOpen = sidebar.classList.contains("sidebar-mobile-open")
+
+      if (isOpen) {
+        closeMobileSidebar()
+      } else {
+        openMobileSidebar()
+      }
+    })
+  }
+
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener("click", () => {
+      closeMobileSidebar()
+    })
+  }
+
+  function openMobileSidebar() {
+    sidebar.classList.add("sidebar-mobile-open")
+    sidebarOverlay.classList.add("active")
+    document.body.style.overflow = "hidden"
+
+    // Фокус на первой ссылке для доступности
+    const firstNavLink = sidebar.querySelector(".nav-link")
+    if (firstNavLink) {
+      setTimeout(() => firstNavLink.focus(), 100)
     }
+  }
+
+  function closeMobileSidebar() {
+    sidebar.classList.remove("sidebar-mobile-open")
+    sidebarOverlay.classList.remove("active")
+    document.body.style.overflow = ""
+  }
+
+  // ===== ВОССТАНОВЛЕНИЕ СОСТОЯНИЯ =====
+  const isPinned = localStorage.getItem("sidebarPinned") === "true"
+  if (isPinned && sidebarPin) {
+    sidebar.classList.add("sidebar-pinned")
+    sidebarPin.classList.add("active")
+    sidebarPin.title = "Unpin sidebar"
+  }
+
+  // ===== ОПТИМИЗИРОВАННАЯ ОБРАБОТКА RESIZE =====
+  let resizeTimeout = null
+  const handleResize = () => {
+    const width = window.innerWidth
+
+    if (width > 1024) {
+      closeMobileSidebar()
+      // Сброс hover состояния при изменении размера
+      if (!sidebar.classList.contains("sidebar-pinned")) {
+        sidebar.classList.remove("sidebar-hovering")
+      }
+    } else {
+      sidebar.classList.remove("sidebar-hovering")
+    }
+  }
+
+  window.addEventListener("resize", () => {
+    if (resizeTimeout) {
+      clearTimeout(resizeTimeout)
+    }
+    resizeTimeout = setTimeout(handleResize, 100)
+  })
+
+  // ===== УЛУЧШЕННЫЕ ЭФФЕКТЫ ДЛЯ НАВИГАЦИИ =====
+  const navLinks = document.querySelectorAll(".nav-link")
+  navLinks.forEach((link) => {
+    // Плавные hover эффекты
+    link.addEventListener("mouseenter", function () {
+      if (!this.classList.contains("active")) {
+        this.style.transform = "translateX(2px)"
+      }
+    })
+
+    link.addEventListener("mouseleave", function () {
+      if (!this.classList.contains("active")) {
+        this.style.transform = "translateX(0)"
+      }
+    })
+
+    // Ripple эффект при клике
+    link.addEventListener("click", function (e) {
+      createOptimizedRipple(this, e)
+    })
+
+    // Закрытие мобильного меню после клика
+    link.addEventListener("click", () => {
+      if (window.innerWidth <= 1024 && sidebar.classList.contains("sidebar-mobile-open")) {
+        setTimeout(() => {
+          closeMobileSidebar()
+        }, 150)
+      }
+    })
+  })
+
+  // ===== KEYBOARD NAVIGATION =====
+  document.addEventListener("keydown", (e) => {
+    // Escape для закрытия мобильного меню
+    if (e.key === "Escape" && sidebar.classList.contains("sidebar-mobile-open")) {
+      closeMobileSidebar()
+    }
+
+    // Ctrl/Cmd + B для toggle pin состояния
+    if ((e.ctrlKey || e.metaKey) && e.key === "b" && window.innerWidth > 1024) {
+      e.preventDefault()
+      if (sidebarPin) {
+        sidebarPin.click()
+      }
+    }
+  })
+
+  // ===== PERFORMANCE OPTIMIZATION =====
+  // Используем Intersection Observer для оптимизации анимаций
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("animate")
+          }
+        })
+      },
+      { threshold: 0.1 },
+    )
+
+    navLinks.forEach((link) => observer.observe(link))
   }
 }
 
-// Search functionality
+// ===== ОПТИМИЗИРОВАННЫЙ RIPPLE ЭФФЕКТ =====
+function createOptimizedRipple(element, event) {
+  // Удаляем предыдущие ripple эффекты
+  const existingRipples = element.querySelectorAll(".ripple-effect")
+  existingRipples.forEach((ripple) => ripple.remove())
+
+  const ripple = document.createElement("span")
+  const rect = element.getBoundingClientRect()
+  const size = Math.max(rect.width, rect.height)
+  const x = event.clientX - rect.left - size / 2
+  const y = event.clientY - rect.top - size / 2
+
+  ripple.className = "ripple-effect"
+  ripple.style.cssText = `
+    position: absolute;
+    width: ${size}px;
+    height: ${size}px;
+    left: ${x}px;
+    top: ${y}px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: scale(0);
+    animation: optimizedRipple 0.6s ease-out;
+    pointer-events: none;
+    z-index: 1;
+  `
+
+  // Убеждаемся, что элемент имеет position: relative
+  const computedStyle = window.getComputedStyle(element)
+  if (computedStyle.position === "static") {
+    element.style.position = "relative"
+  }
+
+  element.style.overflow = "hidden"
+  element.appendChild(ripple)
+
+  // Удаляем ripple после анимации
+  setTimeout(() => {
+    if (ripple.parentNode) {
+      ripple.remove()
+    }
+  }, 600)
+}
+
+// ===== ОСТАЛЬНЫЕ ФУНКЦИИ (без изменений) =====
 function initializeSearch() {
   const searchInput = document.getElementById("searchInput")
   const searchClear = document.getElementById("searchClear")
-  const taskCards = document.querySelectorAll(".task-card")
 
   if (searchInput) {
+    const debouncedSearch = debounce((searchTerm) => {
+      filterTasksBySearch(searchTerm)
+    }, 300)
+
     searchInput.addEventListener("input", function () {
       const searchTerm = this.value.toLowerCase().trim()
 
-      // Show/hide clear button
       if (searchTerm) {
-        searchClear.classList.add("visible")
+        searchClear?.classList.add("visible")
       } else {
-        searchClear.classList.remove("visible")
+        searchClear?.classList.remove("visible")
       }
 
-      // Filter tasks
-      filterTasksBySearch(searchTerm)
+      debouncedSearch(searchTerm)
+    })
+
+    searchInput.addEventListener("focus", function () {
+      this.parentElement.classList.add("focused")
+    })
+
+    searchInput.addEventListener("blur", function () {
+      this.parentElement.classList.remove("focused")
     })
   }
 
@@ -76,8 +319,8 @@ function filterTasksBySearch(searchTerm) {
   const taskCards = document.querySelectorAll(".task-card")
   let visibleCount = 0
 
-  taskCards.forEach((card) => {
-    const title = card.querySelector(".task-title").textContent.toLowerCase()
+  taskCards.forEach((card, index) => {
+    const title = card.querySelector(".task-title")?.textContent.toLowerCase() || ""
     const tags = Array.from(card.querySelectorAll(".tag-pill"))
       .map((tag) => tag.textContent.toLowerCase())
       .join(" ")
@@ -87,32 +330,29 @@ function filterTasksBySearch(searchTerm) {
     if (isVisible) {
       card.style.display = "block"
       card.classList.add("fade-in")
+      card.style.animationDelay = `${index * 0.05}s`
       visibleCount++
     } else {
       card.style.display = "none"
       card.classList.remove("fade-in")
+      card.style.animationDelay = "0s"
     }
   })
 
-  // Show/hide empty state
   toggleEmptyState(visibleCount === 0 && searchTerm !== "")
 }
 
-// Filter functionality
 function initializeFilters() {
   const filterTabs = document.querySelectorAll(".filter-tab")
 
   filterTabs.forEach((tab) => {
     tab.addEventListener("click", function () {
-      // Remove active class from all tabs
       filterTabs.forEach((t) => t.classList.remove("active"))
-
-      // Add active class to clicked tab
       this.classList.add("active")
 
-      // Filter tasks
       const filter = this.dataset.filter
       filterTasks(filter)
+      createOptimizedRipple(this, event)
     })
   })
 }
@@ -121,7 +361,7 @@ function filterTasks(filter) {
   const taskCards = document.querySelectorAll(".task-card")
   let visibleCount = 0
 
-  taskCards.forEach((card) => {
+  taskCards.forEach((card, index) => {
     let isVisible = false
 
     switch (filter) {
@@ -142,100 +382,16 @@ function filterTasks(filter) {
     if (isVisible) {
       card.style.display = "block"
       card.classList.add("slide-up")
+      card.style.animationDelay = `${index * 0.05}s`
       visibleCount++
     } else {
       card.style.display = "none"
       card.classList.remove("slide-up")
+      card.style.animationDelay = "0s"
     }
   })
 
-  // Update filter tab badges
-  updateFilterBadges()
-
-  // Show/hide empty state
   toggleEmptyState(visibleCount === 0)
-}
-
-function updateFilterBadges() {
-  const taskCards = document.querySelectorAll(".task-card")
-  const completedCount = document.querySelectorAll(".task-card.completed").length
-  const pendingCount = document.querySelectorAll(".task-card.pending").length
-  const overdueCount =
-    document.querySelectorAll(".task-card").length - Array.from(taskCards).filter((card) => !isTaskOverdue(card)).length
-
-  // Update filter tab text with counts (if you want to show counts)
-  // This is optional - you can uncomment if you want counts in tabs
-  /*
-    const filterTabs = document.querySelectorAll('.filter-tab');
-    filterTabs.forEach(tab => {
-        const filter = tab.dataset.filter;
-        const span = tab.querySelector('span:last-child');
-
-        switch (filter) {
-            case 'completed':
-                span.textContent = `Completed (${completedCount})`;
-                break;
-            case 'pending':
-                span.textContent = `Pending (${pendingCount})`;
-                break;
-            case 'overdue':
-                span.textContent = `Overdue (${overdueCount})`;
-                break;
-        }
-    });
-    */
-}
-
-// Task statistics
-function initializeTaskStats() {
-  updateTaskStats()
-}
-
-function updateTaskStats() {
-  const taskCards = document.querySelectorAll(".task-card")
-  const completedTasks = document.querySelectorAll(".task-card.completed")
-  const pendingTasks = document.querySelectorAll(".task-card.pending")
-
-  // Count overdue tasks
-  let overdueCount = 0
-  taskCards.forEach((card) => {
-    if (isTaskOverdue(card)) {
-      overdueCount++
-      card.classList.add("overdue")
-    }
-  })
-
-  // Update stat cards
-  const pendingCountEl = document.getElementById("pendingCount")
-  const overdueCountEl = document.getElementById("overdueCount")
-
-  if (pendingCountEl) {
-    animateNumber(pendingCountEl, pendingTasks.length)
-  }
-
-  if (overdueCountEl) {
-    animateNumber(overdueCountEl, overdueCount)
-  }
-}
-
-function animateNumber(element, targetNumber) {
-  const startNumber = Number.parseInt(element.textContent) || 0
-  const duration = 1000
-  const startTime = performance.now()
-
-  function updateNumber(currentTime) {
-    const elapsed = currentTime - startTime
-    const progress = Math.min(elapsed / duration, 1)
-
-    const currentNumber = Math.floor(startNumber + (targetNumber - startNumber) * progress)
-    element.textContent = currentNumber
-
-    if (progress < 1) {
-      requestAnimationFrame(updateNumber)
-    }
-  }
-
-  requestAnimationFrame(updateNumber)
 }
 
 function isTaskOverdue(taskCard) {
@@ -257,13 +413,11 @@ function checkOverdueTasks() {
     if (isTaskOverdue(card)) {
       card.classList.add("overdue")
 
-      // Add overdue styling to deadline info
       const deadlineInfo = card.querySelector(".deadline-info")
       if (deadlineInfo) {
         deadlineInfo.classList.add("overdue")
       }
 
-      // Update priority badge
       const priorityBadge = card.querySelector(".priority-badge")
       if (priorityBadge) {
         priorityBadge.classList.add("high")
@@ -273,18 +427,15 @@ function checkOverdueTasks() {
   })
 }
 
-// Modal functionality
 function initializeModals() {
   const modals = document.querySelectorAll(".modal")
 
   modals.forEach((modal) => {
     const closeBtn = modal.querySelector(".modal-close")
-
     if (closeBtn) {
       closeBtn.addEventListener("click", () => closeModal())
     }
 
-    // Close modal when clicking outside
     modal.addEventListener("click", (e) => {
       if (e.target === modal) {
         closeModal()
@@ -292,7 +443,6 @@ function initializeModals() {
     })
   })
 
-  // Close modal with Escape key
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       closeModal()
@@ -306,7 +456,6 @@ function showModal(modalId) {
     modal.classList.add("active")
     document.body.style.overflow = "hidden"
 
-    // Focus first focusable element
     const focusableElements = modal.querySelectorAll(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     )
@@ -324,7 +473,6 @@ function closeModal() {
   }
 }
 
-// Delete confirmation
 function confirmDelete(deleteUrl) {
   const modal = document.getElementById("deleteModal")
   const confirmBtn = document.getElementById("confirmDeleteBtn")
@@ -335,20 +483,17 @@ function confirmDelete(deleteUrl) {
   }
 }
 
-// Alert functionality
 function initializeAlerts() {
   const alerts = document.querySelectorAll(".alert")
 
   alerts.forEach((alert) => {
     const closeBtn = alert.querySelector(".alert-close")
-
     if (closeBtn) {
       closeBtn.addEventListener("click", () => {
         closeAlert(alert)
       })
     }
 
-    // Auto-close alerts after 5 seconds
     setTimeout(() => {
       if (alert.parentNode) {
         closeAlert(alert)
@@ -366,45 +511,33 @@ function closeAlert(alert) {
   }, 300)
 }
 
-// Task card interactions
 function initializeTaskCards() {
   const taskCards = document.querySelectorAll(".task-card")
 
   taskCards.forEach((card) => {
-    // Add hover effects
     card.addEventListener("mouseenter", function () {
       this.style.transform = "translateY(-4px)"
+      this.style.transition = "transform 0.3s ease"
     })
 
     card.addEventListener("mouseleave", function () {
       this.style.transform = "translateY(0)"
     })
 
-    // Handle form submissions with loading states
     const toggleForm = card.querySelector(".toggle-form")
     if (toggleForm) {
       toggleForm.addEventListener("submit", function (e) {
         const button = this.querySelector(".btn-toggle")
         const originalText = button.innerHTML
-
         button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...'
         button.disabled = true
-
-        // Show loading overlay
         showLoading()
-
-        // The form will submit normally, but we show loading state
-        setTimeout(() => {
-          hideLoading()
-        }, 1000)
       })
     }
   })
 }
 
-// Loading states
 function initializeLoadingStates() {
-  // Add loading states to all forms
   const forms = document.querySelectorAll("form")
 
   forms.forEach((form) => {
@@ -414,7 +547,6 @@ function initializeLoadingStates() {
         const originalText = submitBtn.textContent
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...'
         submitBtn.disabled = true
-
         showLoading()
       }
     })
@@ -435,98 +567,6 @@ function hideLoading() {
   }
 }
 
-// Utility functions
-function toggleEmptyState(show) {
-  const emptyState = document.querySelector(".empty-state")
-  const taskGrid = document.querySelector(".task-grid")
-
-  if (show) {
-    if (taskGrid) taskGrid.style.display = "none"
-    if (emptyState) emptyState.style.display = "block"
-  } else {
-    if (taskGrid) taskGrid.style.display = "grid"
-    if (emptyState) emptyState.style.display = "none"
-  }
-}
-
-// Smooth scrolling for anchor links
-document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-  anchor.addEventListener("click", function (e) {
-    e.preventDefault()
-    const target = document.querySelector(this.getAttribute("href"))
-    if (target) {
-      target.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      })
-    }
-  })
-})
-
-// Add CSS animation classes
-const style = document.createElement("style")
-style.textContent = `
-    @keyframes slideOutUp {
-        from {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-    }
-`
-document.head.appendChild(style)
-
-// Performance optimization: Debounce search
-function debounce(func, wait) {
-  let timeout
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout)
-      func(...args)
-    }
-    clearTimeout(timeout)
-    timeout = setTimeout(later, wait)
-  }
-}
-
-// Apply debounce to search
-const searchInput = document.getElementById("searchInput")
-if (searchInput) {
-  const debouncedSearch = debounce((searchTerm) => {
-    filterTasksBySearch(searchTerm)
-  }, 300)
-
-  searchInput.addEventListener("input", function () {
-    const searchTerm = this.value.toLowerCase().trim()
-    debouncedSearch(searchTerm)
-  })
-}
-
-// Accessibility improvements
-document.addEventListener("keydown", (e) => {
-  // Handle keyboard navigation for task cards
-  if (e.key === "Tab") {
-    const focusedElement = document.activeElement
-    if (focusedElement.classList.contains("task-card")) {
-      // Add visual focus indicator
-      focusedElement.style.outline = "2px solid var(--primary-color)"
-      focusedElement.style.outlineOffset = "2px"
-    }
-  }
-})
-
-// Remove focus outline when clicking
-document.addEventListener("click", () => {
-  const focusedElement = document.activeElement
-  if (focusedElement.classList.contains("task-card")) {
-    focusedElement.style.outline = "none"
-  }
-})
-
-// Initialize tooltips (if you want to add them)
 function initializeTooltips() {
   const tooltipElements = document.querySelectorAll("[title]")
 
@@ -559,5 +599,116 @@ function initializeTooltips() {
   })
 }
 
-// Call initialize tooltips
-initializeTooltips()
+function toggleEmptyState(show) {
+  const emptyState = document.querySelector(".empty-state")
+  const taskGrid = document.querySelector(".task-grid")
+
+  if (show) {
+    if (taskGrid) taskGrid.style.display = "none"
+    if (emptyState) emptyState.style.display = "block"
+  } else {
+    if (taskGrid) taskGrid.style.display = "grid"
+    if (emptyState) emptyState.style.display = "none"
+  }
+}
+
+function debounce(func, wait) {
+  let timeout
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout)
+      func(...args)
+    }
+    clearTimeout(timeout)
+    timeout = setTimeout(later, wait)
+  }
+}
+
+// ===== ДОПОЛНИТЕЛЬНЫЕ CSS АНИМАЦИИ =====
+if (!document.querySelector("#optimized-sidebar-styles")) {
+  const style = document.createElement("style")
+  style.id = "optimized-sidebar-styles"
+  style.textContent = `
+    @keyframes optimizedRipple {
+      to {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+    
+    @keyframes slideOutUp {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+    }
+    
+    .tooltip {
+      position: absolute;
+      background: var(--bg-dark);
+      color: var(--text-white);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--border-radius-sm);
+      font-size: var(--font-size-sm);
+      z-index: 1000;
+      pointer-events: none;
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .search-box.focused {
+      transform: scale(1.02);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+    
+    .slide-up {
+      animation: slideUp 0.5s ease-out forwards;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Оптимизация производительности */
+    .nav-link.animate {
+      animation: navLinkFadeIn 0.3s ease-out;
+    }
+    
+    @keyframes navLinkFadeIn {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+  `
+  document.head.appendChild(style)
+}

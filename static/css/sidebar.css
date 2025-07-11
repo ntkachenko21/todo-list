@@ -1,12 +1,11 @@
-/* ===== ИДЕАЛЬНЫЙ САЙДБАР - ПОЛНОЕ РЕШЕНИЕ ===== */
-
-/* Основные переменные для сайдбара */
+/* ===== ИСПРАВЛЕННЫЙ САЙДБАР - РЕШЕНИЕ ВСЕХ ПРОБЛЕМ ===== */
 :root {
   --sidebar-width-closed: 70px;
   --sidebar-width-open: 280px;
   --sidebar-transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   --sidebar-icon-size: 20px;
   --sidebar-padding: 1.5rem;
+  --nav-item-height: 48px;
 }
 
 /* ===== ОСНОВНОЙ КОНТЕЙНЕР САЙДБАРА ===== */
@@ -26,7 +25,6 @@
   overflow: hidden;
 }
 
-/* Состояния сайдбара */
 .sidebar:hover:not(.sidebar-pinned),
 .sidebar.sidebar-hovering,
 .sidebar.sidebar-pinned {
@@ -76,7 +74,7 @@
   flex-direction: column;
   opacity: 0;
   transform: translateX(-20px);
-  transition: var(--sidebar-transition);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   white-space: nowrap;
   overflow: hidden;
 }
@@ -117,9 +115,9 @@
   justify-content: center;
   color: var(--text-muted);
   cursor: pointer;
-  transition: var(--sidebar-transition);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   opacity: 0;
-  transform: scale(0.8) rotate(-15deg);
+  transform: scale(0.8);
   flex-shrink: 0;
   position: relative;
 }
@@ -129,20 +127,20 @@
 .sidebar.sidebar-mobile-open .sidebar-pin,
 .sidebar.sidebar-hovering .sidebar-pin {
   opacity: 1;
-  transform: scale(1) rotate(0deg);
+  transform: scale(1);
   transition-delay: 0.2s;
 }
 
 .sidebar-pin:hover {
   background: var(--bg-tertiary);
   color: var(--primary-color);
-  transform: scale(1.1) rotate(0deg) !important;
+  transform: scale(1.1) !important;
 }
 
 .sidebar-pin.active {
   background: var(--primary-color);
   color: var(--text-white);
-  transform: scale(1) rotate(45deg) !important;
+  transform: scale(1) !important;
 }
 
 /* ===== НАВИГАЦИЯ ===== */
@@ -169,29 +167,39 @@
   pointer-events: none;
 }
 
-/* ===== ССЫЛКИ НАВИГАЦИИ ===== */
+/* ===== КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: НАВИГАЦИОННЫЕ ССЫЛКИ ===== */
 .nav-link {
   display: flex;
   align-items: center;
-  padding: var(--spacing-md) var(--sidebar-padding);
+  padding: 0;
   color: var(--text-secondary);
   text-decoration: none;
   transition: var(--sidebar-transition);
   position: relative;
   margin: 0 var(--spacing-sm);
   border-radius: var(--border-radius);
-  min-height: 48px;
-  gap: 0; /* Убираем gap по умолчанию */
-  justify-content: center; /* Центрируем в закрытом состоянии */
+  height: var(--nav-item-height);
+  overflow: hidden;
 }
 
-/* В открытом состоянии меняем выравнивание и добавляем gap */
-.sidebar:hover .nav-link,
-.sidebar.sidebar-pinned .nav-link,
-.sidebar.sidebar-mobile-open .nav-link,
-.sidebar.sidebar-hovering .nav-link {
-  gap: var(--spacing-md);
+/* КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: Контейнер для правильного позиционирования */
+.nav-link-content {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 0 var(--spacing-md);
+  transition: var(--sidebar-transition);
+}
+
+/* В открытом состоянии - нормальное расположение */
+.sidebar:hover .nav-link-content,
+.sidebar.sidebar-pinned .nav-link-content,
+.sidebar.sidebar-mobile-open .nav-link-content,
+.sidebar.sidebar-hovering .nav-link-content {
   justify-content: flex-start;
+  padding: 0 var(--spacing-md);
+  gap: var(--spacing-md);
 }
 
 .nav-link:hover {
@@ -221,19 +229,15 @@
   flex-shrink: 0;
   color: inherit;
   transition: var(--sidebar-transition);
-  position: relative;
 }
 
-/* В закрытом состоянии иконка уже центрирована через justify-content: center у родителя */
-/* В открытом состоянии иконка остается на месте благодаря gap */
-
-/* ===== ТЕКСТ НАВИГАЦИИ ===== */
+/* ===== ТЕКСТ НАВИГАЦИИ - ПЛАВНАЯ АНИМАЦИЯ ===== */
 .nav-text {
   font-weight: 500;
   font-size: var(--font-size-sm);
   opacity: 0;
   transform: translateX(-20px);
-  transition: var(--sidebar-transition);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   white-space: nowrap;
   overflow: hidden;
   flex: 1;
@@ -257,8 +261,9 @@
   padding: 2px 6px;
   border-radius: 10px;
   opacity: 0;
-  transform: scale(0.8) translateX(-10px);
-  transition: var(--sidebar-transition);
+  transform: scale(0.6);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  flex-shrink: 0;
 }
 
 .sidebar:hover .nav-badge,
@@ -266,8 +271,8 @@
 .sidebar.sidebar-mobile-open .nav-badge,
 .sidebar.sidebar-hovering .nav-badge {
   opacity: 1;
-  transform: scale(1) translateX(0);
-  transition-delay: 0.15s;
+  transform: scale(1);
+  transition-delay: 0.2s;
 }
 
 /* ===== ИНДИКАТОР АКТИВНОГО ЭЛЕМЕНТА ===== */
@@ -280,7 +285,7 @@
   height: 0;
   background: var(--primary-color);
   border-radius: 0 2px 2px 0;
-  transition: height var(--transition-fast);
+  transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .nav-link.active .nav-indicator {
@@ -302,7 +307,7 @@
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
-  transition: all var(--transition-fast);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   z-index: 1001;
   box-shadow: var(--shadow-lg);
   pointer-events: none;
@@ -321,7 +326,7 @@
   border-color: transparent var(--bg-dark) transparent transparent;
   opacity: 0;
   visibility: hidden;
-  transition: all var(--transition-fast);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   z-index: 1001;
   pointer-events: none;
 }
@@ -353,7 +358,6 @@
   background: var(--bg-tertiary);
 }
 
-/* ИСПРАВЛЕНИЕ: Правильный размер аватара */
 .user-avatar {
   width: 40px;
   height: 40px;
@@ -370,7 +374,7 @@
   flex-direction: column;
   opacity: 0;
   transform: translateX(-20px);
-  transition: var(--sidebar-transition);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   white-space: nowrap;
   overflow: hidden;
   flex: 1;
@@ -383,7 +387,7 @@
 .sidebar.sidebar-hovering .user-info {
   opacity: 1;
   transform: translateX(0);
-  transition-delay: 0.1s;
+  transition-delay: 0.15s;
 }
 
 .user-name {
@@ -401,7 +405,7 @@
 .user-menu {
   opacity: 0;
   transform: scale(0.8);
-  transition: var(--sidebar-transition);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .sidebar:hover .user-menu,
@@ -410,10 +414,9 @@
 .sidebar.sidebar-hovering .user-menu {
   opacity: 1;
   transform: scale(1);
-  transition-delay: 0.15s;
+  transition-delay: 0.2s;
 }
 
-/* ИСПРАВЛЕНИЕ: Правильный размер кнопки меню */
 .user-menu-btn {
   width: 24px;
   height: 24px;
@@ -492,7 +495,6 @@
   flex: 1;
 }
 
-/* Смещение при наведении на сайдбар */
 .sidebar:hover ~ .main-content:not(.sidebar-pinned ~ .main-content),
 .sidebar.sidebar-hovering ~ .main-content:not(.sidebar-pinned ~ .main-content) {
   margin-left: var(--sidebar-width-open);
@@ -522,7 +524,6 @@
     margin-left: 0 !important;
   }
 
-  /* Убираем hover эффекты на мобильных */
   .sidebar:hover ~ .main-content,
   .sidebar.sidebar-pinned ~ .main-content,
   .sidebar.sidebar-hovering ~ .main-content {
@@ -545,14 +546,11 @@
 }
 
 /* ===== ДОПОЛНИТЕЛЬНЫЕ УЛУЧШЕНИЯ ===== */
-
-/* Плавность для всех элементов */
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Улучшенные focus состояния */
 .nav-link:focus,
 .sidebar-pin:focus,
 .sidebar-mobile-toggle:focus {
@@ -566,7 +564,6 @@
   outline: none;
 }
 
-/* Скроллбар для навигации */
 .sidebar-nav::-webkit-scrollbar {
   width: 4px;
 }
@@ -584,13 +581,7 @@
   background: var(--text-muted);
 }
 
-/* Ripple эффект для nav-link */
-.nav-link {
-  position: relative;
-  overflow: hidden;
-}
-
-/* Дополнительные анимации */
+/* ===== АНИМАЦИИ ===== */
 @keyframes ripple {
   to {
     transform: scale(2);
@@ -598,7 +589,6 @@
   }
 }
 
-/* Улучшенная анимация для тултипов */
 .sidebar-pin::before {
   content: attr(title);
   position: absolute;
@@ -613,32 +603,26 @@
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
-  transition: all var(--transition-fast);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   z-index: 1001;
   box-shadow: var(--shadow-lg);
   pointer-events: none;
 }
 
-.sidebar-pin::after {
-  content: "";
-  position: absolute;
-  bottom: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-style: solid;
-  border-width: 0 6px 8px 6px;
-  border-color: transparent transparent var(--bg-dark) transparent;
-  opacity: 0;
-  visibility: hidden;
-  transition: all var(--transition-fast);
-  z-index: 1001;
-  pointer-events: none;
-}
-
-.sidebar-pin:hover::before,
-.sidebar-pin:hover::after {
+.sidebar-pin:hover::before {
   opacity: 1;
   visibility: visible;
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+.sidebar,
+.nav-link,
+.nav-icon,
+.nav-text,
+.nav-badge {
+  will-change: transform, opacity;
+}
+
+.sidebar {
+  contain: layout style paint;
 }

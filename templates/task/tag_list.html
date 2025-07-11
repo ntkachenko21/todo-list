@@ -1,21 +1,129 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    <title>Tags - Task Manager</title>
+{% endblock title %}
 
 {% block content %}
-  <h1>Tags</h1>
-  <br>
-  <div class="tag-card-list">
-    <a href="{% url 'task:tag-create' %}" class="btn add-btn">Add new tag</a>
-    {% for tag in tag_list %}
-      <div class="tag-card">
-        <div class="tag-name">{{ tag.name }}</div>
-        <div class="tag-actions">
-          <a href="{% url 'task:tag-update' tag.pk %}" class="btn update-btn">Update</a>
-          <a href="{% url 'task:tag-delete' tag.pk %}" class="btn delete-btn">Delete</a>
+<div class="content-wrapper">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1>
+                <i class="fas fa-tags"></i>
+                Tag Management
+            </h1>
+            <p class="page-subtitle">Organize your tasks with custom tags</p>
         </div>
-      </div>
-    {% empty %}
-      <p>No tags found.</p>
-    {% endfor %}
-  </div>
+        <div class="header-actions">
+            <a href="{% url 'task:tag-create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Add New Tag
+            </a>
+        </div>
+    </div>
 
-{% endblock %}
+    <!-- Tags Container -->
+    <div class="tags-container">
+        {% if tag_list %}
+            <div class="tag-grid">
+                {% for tag in tag_list %}
+                    <div class="tag-card">
+                        <div class="tag-header">
+                            <div class="tag-info">
+                                <h3>
+                                    <i class="fas fa-tag"></i>
+                                    {{ tag.name }}
+                                </h3>
+                                <div class="tag-stats">
+                                    {% if tag.tasks.count %}
+                                        <span class="task-count">
+                                            <i class="fas fa-tasks"></i>
+                                            {{ tag.tasks.count }} task{{ tag.tasks.count|pluralize }}
+                                        </span>
+                                    {% else %}
+                                        <span class="no-tasks">
+                                            <i class="fas fa-info-circle"></i>
+                                            No tasks assigned
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="tag-color">
+                                <div class="color-indicator"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="tag-actions">
+                            {% if tag.tasks.count %}
+                                <a href="{% url 'task:tasks-by-tag' tag.pk %}" class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-eye"></i>
+                                    View Tasks
+                                </a>
+                            {% endif %}
+                            <a href="{% url 'task:tag-update' tag.pk %}" class="btn-icon btn-edit" title="Edit Tag">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button class="btn-icon btn-delete" onclick="confirmDelete('{% url 'task:tag-delete' tag.pk %}')" title="Delete Tag">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-tags"></i>
+                </div>
+                <h3>No tags yet</h3>
+                <p>Create your first tag to start organizing your tasks better.</p>
+                <a href="{% url 'task:tag-create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Create First Tag
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal" id="deleteModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Confirm Delete</h3>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete this tag? This action cannot be undone and will remove the tag from all associated tasks.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            <a href="#" class="btn btn-danger" id="confirmDeleteBtn">Delete</a>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete(deleteUrl) {
+    const modal = document.getElementById('deleteModal');
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    
+    confirmBtn.href = deleteUrl;
+    modal.classList.add('active');
+}
+
+function closeModal() {
+    const modal = document.getElementById('deleteModal');
+    modal.classList.remove('active');
+}
+
+// Close modal on overlay click
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeModal();
+    }
+});
+</script>
+{% endblock content %}

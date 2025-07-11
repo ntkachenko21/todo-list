@@ -1,16 +1,103 @@
-<div class="sidebar">
-  <ul class="sidebar-nav">
-    <li>
-      <a href="{% url 'task:index' %}" class="{% if request.path == '/' %}active{% endif %}">
-        <span class="icon">🏠</span>
-        <span class="label">Home</span>
-      </a>
-    </li>
-    <li>
-      <a href="{% url 'task:tag-list' %}" class="{% if request.path == '/tags/' %}active{% endif %}">
-        <span class="icon">🏷️</span>
-        <span class="label">Tags</span>
-      </a>
-    </li>
-  </ul>
-</div>>
+<aside class="sidebar" id="sidebar">
+    <!-- Sidebar Header -->
+    <div class="sidebar-header">
+        <div class="logo-container">
+            <div class="logo-icon">
+                <i class="fas fa-tasks"></i>
+            </div>
+            <div class="logo-text">
+                <span class="logo-title">TaskFlow</span>
+                <span class="logo-subtitle">Pro</span>
+            </div>
+        </div>
+        <button class="sidebar-pin" id="sidebarPin" title="Pin sidebar">
+            <i class="fas fa-thumbtack"></i>
+        </button>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a href="{% url 'task:index' %}"
+                   class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}"
+                   data-tooltip="Dashboard">
+                    <div class="nav-link-content">
+                        <div class="nav-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <span class="nav-text">Dashboard</span>
+                        <div class="nav-indicator"></div>
+                    </div>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="{% url 'task:tag-list' %}"
+                   class="nav-link {% if 'tag' in request.resolver_match.url_name %}active{% endif %}"
+                   data-tooltip="Tags">
+                    <div class="nav-link-content">
+                        <div class="nav-icon">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                        <span class="nav-text">Tags</span>
+                        <div class="nav-indicator"></div>
+                    </div>
+                </a>
+            </li>
+
+            <!-- Placeholder for future menu items -->
+            <li class="nav-item nav-item-disabled">
+                <a href="#" class="nav-link" data-tooltip="Statistics (Coming Soon)">
+                    <div class="nav-link-content">
+                        <div class="nav-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <span class="nav-text">Statistics with AI</span>
+                        <span class="nav-badge">Soon</span>
+                        <div class="nav-indicator"></div>
+                    </div>
+                </a>
+            </li>
+
+            <li class="nav-item nav-item-disabled">
+                <a href="#" class="nav-link" data-tooltip="Settings (Coming Soon)">
+                    <div class="nav-link-content">
+                        <div class="nav-icon">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <span class="nav-text">Settings</span>
+                        <span class="nav-badge">Soon</span>
+                        <div class="nav-indicator"></div>
+                    </div>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+        <div class="user-profile">
+            <div class="user-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="user-info">
+                <span class="user-name">Welcome back!</span>
+                <span class="user-status">Free Plan</span>
+            </div>
+            <div class="user-menu">
+                <button class="user-menu-btn" title="User menu">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Toggle -->
+    <button class="sidebar-mobile-toggle" id="sidebarMobileToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+</aside>
+
+<!-- Sidebar Overlay for Mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>

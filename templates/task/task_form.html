@@ -1,12 +1,149 @@
 {% extends "base.html" %}
-{% load crispy_forms_tags crispy_forms_filters %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    <title>{% if object %}Edit Task{% else %}Create Task{% endif %} - Task Manager</title>
+{% endblock title %}
 
 {% block content %}
-  <h1>{{ object|yesno:"Update,Create" }} task</h1>
-  <form action="" method="post" novalidate>
-    {% csrf_token %}
-    {{ form|crispy }} 
+    <div class="page-header">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="fas {% if object %}fa-edit{% else %}fa-plus{% endif %}"></i>
+                {% if object %}Edit Task{% else %}Create New Task{% endif %}
+            </h1>
+            <p class="page-subtitle">
+                {% if object %}Update your task details{% else %}Add a new task to your list{% endif %}
+            </p>
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="window.location.href='{% url 'task:index' %}'">
+                <i class="fas fa-arrow-left"></i>
+                Back to Tasks
+            </button>
+        </div>
+    </div>
 
-    <input type="submit" value="Submit" class="btn add-btn">
-  </form>
-{% endblock %}
+    <div class="form-container">
+        <div class="form-card">
+            <form method="post" class="task-form" novalidate>
+                {% csrf_token %}
+                
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Task Details
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.content.id_for_label }}" class="form-label">
+                            <i class="fas fa-align-left"></i>
+                            Task Description
+                        </label>
+                        <textarea name="{{ form.content.name }}" 
+                                  id="{{ form.content.id_for_label }}" 
+                                  class="form-control{% if form.content.errors %} error{% endif %}"
+                                  rows="4"
+                                  placeholder="Enter your task description..."
+                                  required>{% if form.content.value %}{{ form.content.value }}{% endif %}</textarea>
+                        {% if form.content.errors %}
+                            <div class="form-error">
+                                {% for error in form.content.errors %}
+                                    <span><i class="fas fa-exclamation-circle"></i> {{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.deadline.id_for_label }}" class="form-label">
+                                <i class="fas fa-calendar-alt"></i>
+                                Deadline (Optional)
+                            </label>
+                            <input type="datetime-local" 
+                                   name="{{ form.deadline.name }}" 
+                                   id="{{ form.deadline.id_for_label }}" 
+                                   class="form-control{% if form.deadline.errors %} error{% endif %}"
+                                   value="{% if form.deadline.value %}{{ form.deadline.value|date:'Y-m-d\TH:i' }}{% endif %}">
+                            {% if form.deadline.errors %}
+                                <div class="form-error">
+                                    {% for error in form.deadline.errors %}
+                                        <span><i class="fas fa-exclamation-circle"></i> {{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if object %}
+                            <div class="form-group">
+                                <label for="{{ form.is_done.id_for_label }}" class="form-label">
+                                    <i class="fas fa-check-circle"></i>
+                                    Status
+                                </label>
+                                <div class="checkbox-wrapper">
+                                    <input type="checkbox" 
+                                           name="{{ form.is_done.name }}" 
+                                           id="{{ form.is_done.id_for_label }}" 
+                                           class="form-checkbox"
+                                           {% if form.is_done.value %}checked{% endif %}>
+                                    <label for="{{ form.is_done.id_for_label }}" class="checkbox-label">
+                                        Mark as completed
+                                    </label>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-tags"></i>
+                        Tags
+                    </h3>
+                    
+                    <div class="form-group">
+                        <div class="tags-selection">
+                            {% for tag in form.tags.field.queryset %}
+                                <div class="tag-option">
+                                    <input type="checkbox" 
+                                           name="{{ form.tags.name }}" 
+                                           value="{{ tag.pk }}" 
+                                           id="id_tags_{{ forloop.counter0 }}"
+                                           {% if tag in form.tags.value %}checked{% endif %}>
+                                    <label for="id_tags_{{ forloop.counter0 }}" class="tag-label">
+                                        <i class="fas fa-tag"></i>
+                                        {{ tag.name }}
+                                    </label>
+                                </div>
+                            {% empty %}
+                                <p class="no-tags-available">
+                                    <i class="fas fa-info-circle"></i>
+                                    No tags available. <a href="{% url 'task:tag-create' %}">Create your first tag</a>.
+                                </p>
+                            {% endfor %}
+                        </div>
+                        {% if form.tags.errors %}
+                            <div class="form-error">
+                                {% for error in form.tags.errors %}
+                                    <span><i class="fas fa-exclamation-circle"></i> {{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'task:index' %}'">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas {% if object %}fa-save{% else %}fa-plus{% endif %}"></i>
+                        {% if object %}Update Task{% else %}Create Task{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

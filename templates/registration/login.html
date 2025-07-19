@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - TaskFlow</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="login-container">
+        <div class="left-section">
+            <div class="logo">
+                <div class="logo-icon">T</div>
+                TaskFlow
+            </div>
+            
+            <div class="main-content">
+              <h1 class="main-heading">
+                  Your Tasks,<br>
+                  <span class="highlight">Perfectly Organized.</span>
+              </h1>
+              
+              <ul class="benefits">
+                  <li class="benefit-item">
+                      <div class="benefit-icon">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      </div>
+                      <span>Turn big goals into actionable steps.</span>
+                  </li>
+                  <li class="benefit-item">
+                      <div class="benefit-icon">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>
+                      </div>
+                      <span>Always know what’s next and meet every deadline.</span>
+                  </li>
+                  <li class="benefit-item">
+                      <div class="benefit-icon">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                      </div>
+                      <span>Keep your team perfectly in sync.</span>
+                  </li>
+              </ul>
+          </div>
+        </div>
+
+        <div class="right-section">
+            <div class="signup-form">
+                <h2 class="welcome-title">Get Started with <strong>TaskFlow</strong></h2>
+                
+                <button class="google-btn" id="googleSignupBtn">
+                    <div class="google-icon"></div>
+                    Sign up with Google
+                </button>
+                
+                <div class="divider">OR</div>
+                
+                <form id="signupForm" method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <input type="email" class="form-input" placeholder="Email" name="email" id="email" required>
+                        <div class="error-message" id="emailError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <div class="password-container">
+                            <input type="password" class="form-input" placeholder="Password" name="password" id="password" required>
+                            <button type="button" class="password-toggle" id="passwordToggle">👁</button>
+                        </div>
+                        <div class="error-message" id="passwordError"></div>
+                    </div>
+                    
+                    <div class="checkbox-container">
+                        <input type="checkbox" class="checkbox" id="updates" name="updates">
+                        <label for="updates" class="checkbox-label">
+                            I want to receive product updates and productivity tips from TaskFlow
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="signup-btn" id="signupBtn">
+                        <span class="btn-text">SIGN UP</span>
+                        <div class="btn-spinner hidden">
+                            <div class="spinner"></div>
+                        </div>
+                    </button>
+                </form>
+                
+                <p class="terms-text">
+                    By continuing, you agree to the TaskFlow <a href="#" class="terms-link">Terms of Service</a> and the <a href="#" class="terms-link">Privacy Policy</a>
+                </p>
+                
+                <p class="signin-link">
+                    Already a member? <a href="{% url 'login' %}">Sign in now</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <p>Creating your account...</p>
+        </div>
+    </div>
+
+    <div class="alert-container" id="alertContainer"></div>
+
+    <script src="{% static 'js/login.js' %}"></script>
+</body>
+</html>

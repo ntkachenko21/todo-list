@@ -19,7 +19,6 @@ class Task(models.Model):
     def description(self):
         return self.content
 
-
     def __str__(self):
         return self.content
 

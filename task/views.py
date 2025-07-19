@@ -1,14 +1,14 @@
 from django.core.cache import cache
 from django.db.models import Count, Q
-from django.utils import timezone
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views import generic
 from django.views.generic import View
 
-from task.forms import TaskForm, TaskUpdateForm, TagForm
-from task.models import Task, Tag
+from task.forms import TagForm, TaskForm, TaskUpdateForm
+from task.models import Tag, Task
 
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -19,10 +19,7 @@ def index(request: HttpRequest) -> HttpResponse:
     completed_tasks = tasks.filter(is_done=True).count()
     pending_tasks = tasks.filter(is_done=False).count()
 
-    overdue_tasks = tasks.filter(
-        is_done=False,
-        deadline__lt=timezone.now()
-    ).count()
+    overdue_tasks = tasks.filter(is_done=False, deadline__lt=timezone.now()).count()
 
     context = {
         "tasks": tasks,
@@ -49,12 +46,12 @@ class TaskDetailView(generic.DetailView):
 
         related_tasks = self._get_related_tasks(task)
 
-
-
-        context.update({
-            "related_tasks": related_tasks,
-            "page_title": f"{task.title} - Task Details",
-        })
+        context.update(
+            {
+                "related_tasks": related_tasks,
+                "page_title": f"{task.title} - Task Details",
+            }
+        )
 
         return context
 
@@ -67,11 +64,12 @@ class TaskDetailView(generic.DetailView):
             tags_ids = list(task.tags.values_list("id", flat=True))
 
             if tags_ids:
-                related_tasks = Task.objects.filter(
-                    tags__in=tags_ids
-                ).exclude(
-                    id=task.id
-                ).prefetch_related("tags").distinct()[:5]
+                related_tasks = (
+                    Task.objects.filter(tags__in=tags_ids)
+                    .exclude(id=task.id)
+                    .prefetch_related("tags")
+                    .distinct()[:5]
+                )
 
                 cache.set(cache_key, related_tasks, 60 * 15)
             else:
@@ -82,26 +80,28 @@ class TaskDetailView(generic.DetailView):
 
 class TasksByTagView(generic.ListView):
     model = Task
-    template_name = 'task/tasks_by_tag.html'
-    context_object_name = 'tasks'
+    template_name = "task/tasks_by_tag.html"
+    context_object_name = "tasks"
     paginate_by = 20
 
     def get_queryset(self):
         self.tag = get_object_or_404(Tag, pk=self.kwargs["pk"])
-        return Task.objects.filter(
-            tags=self.tag
-        ).prefetch_related("tags").order_by('-created_at')
+        return (
+            Task.objects.filter(tags=self.tag)
+            .prefetch_related("tags")
+            .order_by("-created_at")
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         tasks = self.get_queryset()
 
-        context['tag'] = self.tag
+        context["tag"] = self.tag
 
         stats = self._get_tasks_statistics(tasks)
         context.update(stats)
 
-        context['related_tags'] = self._get_related_tags(tasks)
+        context["related_tags"] = self._get_related_tags(tasks)
 
         return context
 
@@ -114,17 +114,16 @@ class TasksByTagView(generic.ListView):
                 total=Count("id"),
                 completed=Count("id", filter=Q(is_done=True)),
                 pending=Count("id", filter=Q(is_done=False)),
-                overdue=Count("id", filter=Q(
-                    is_done=False,
-                    deadline__lt=timezone.now()
-                ))
+                overdue=Count(
+                    "id", filter=Q(is_done=False, deadline__lt=timezone.now())
+                ),
             )
 
             stats = {
                 "total_count": stats_result["total"],
                 "completed_count": stats_result["completed"],
                 "pending_count": stats_result["pending"],
-                "overdue_count": stats_result["overdue"]
+                "overdue_count": stats_result["overdue"],
             }
             cache.set(cache_key, stats, 60 * 10)
 
@@ -136,11 +135,12 @@ class TasksByTagView(generic.ListView):
 
         if related_tags is None:
             task_ids = tasks.values_list("id", flat=True)
-            related_tags = Tag.objects.filter(
-                tasks__in=task_ids
-            ).exclude(id=self.tag.id).annotate(
-                task_count=Count("tasks", distinct=True)
-            ).order_by("-task_count")[:10]
+            related_tags = (
+                Tag.objects.filter(tasks__in=task_ids)
+                .exclude(id=self.tag.id)
+                .annotate(task_count=Count("tasks", distinct=True))
+                .order_by("-task_count")[:10]
+            )
             cache.set(cache_key, related_tags, 60 * 30)
 
         return related_tags

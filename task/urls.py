@@ -1,15 +1,17 @@
 from django.urls import path
 
 from task.views import (
-    index,
-    TagListView,
     TagCreateView,
     TagDeleteView,
+    TagListView,
     TagUpdateView,
     TaskCreateView,
     TaskDeleteView,
+    TaskDetailView,
+    TasksByTagView,
     TaskUpdateView,
-    ToggleTaskStatusView, TaskDetailView, TasksByTagView,
+    ToggleTaskStatusView,
+    index,
 )
 
 urlpatterns = [
@@ -23,7 +25,11 @@ urlpatterns = [
     path("task/<int:pk>/update/", TaskUpdateView.as_view(), name="task-update"),
     path("task/<int:pk>/", TaskDetailView.as_view(), name="task-detail"),
     path("tags/<int:pk>/tasks/", TasksByTagView.as_view(), name="tasks-by-tag"),
-    path("tasks/<int:pk>/toggle-status/", ToggleTaskStatusView.as_view(), name="task-toggle-status"),
+    path(
+        "tasks/<int:pk>/toggle-status/",
+        ToggleTaskStatusView.as_view(),
+        name="task-toggle-status",
+    ),
 ]
 
 app_name = "task"

@@ -1,4 +1,4 @@
-/* Login Page Styles */
+/* Login Page Styles - ФИНАЛЬНАЯ ВЕРСИЯ */
 * {
     margin: 0;
     padding: 0;
@@ -69,12 +69,12 @@ body {
     margin: 0;
     padding: 0;
     height: 100vh;
-    overflow: hidden;
+    overflow: auto;
 }
 
 .login-container {
     display: flex;
-    height: 100vh;
+    min-height: 100vh;
 }
 
 /* Left Section */
@@ -173,6 +173,11 @@ body {
     flex-shrink: 0;
 }
 
+.benefit-icon svg {
+    width: 15px;
+    height: 15px;
+}
+
 .benefit-number {
     font-weight: 700;
     margin-right: var(--spacing-xs);
@@ -186,6 +191,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow-y: auto;
 }
 
 .signup-form {
@@ -216,7 +222,7 @@ body {
     color: var(--text-secondary);
     cursor: pointer;
     transition: var(--transition-normal);
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
     font-family: var(--font-family);
 }
 
@@ -236,7 +242,7 @@ body {
 
 .divider {
     text-align: center;
-    margin: var(--spacing-xl) 0;
+    margin: var(--spacing-lg) 0;
     color: var(--text-muted);
     font-size: var(--font-size-sm);
     position: relative;
@@ -260,8 +266,11 @@ body {
     right: 0;
 }
 
+/* ===== ИДЕАЛЬНАЯ СИСТЕМА ДЛЯ ПОЛЕЙ И ОШИБОК ===== */
 .form-group {
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: var(--spacing-md); /* 16px между полями */
+    position: relative;
+    min-height: calc(3rem + 1.2rem); /* Высота поля + место для ошибки */
 }
 
 .form-input {
@@ -274,6 +283,7 @@ body {
     transition: var(--transition-fast);
     font-family: var(--font-family);
     color: var(--text-primary);
+    height: 3rem; /* Фиксированная высота поля */
 }
 
 .form-input:focus {
@@ -284,6 +294,32 @@ body {
 
 .form-input::placeholder {
     color: var(--text-muted);
+}
+
+.form-input.error {
+    border-color: var(--danger-color) !important;
+    box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.1);
+}
+
+/* Ошибки всегда в одном месте */
+.error-message {
+    position: absolute;
+    top: calc(3rem + 0.25rem); /* Сразу под полем */
+    left: 0;
+    right: 0;
+    color: var(--danger-color);
+    font-size: var(--font-size-xs);
+    line-height: 1.2;
+    height: 1.2rem; /* Фиксированная высота для ошибки */
+    opacity: 0;
+    transform: translateY(-2px);
+    transition: all 0.2s ease-in-out;
+    pointer-events: none;
+}
+
+.error-message:not(:empty) {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .password-container {
@@ -303,6 +339,7 @@ body {
     padding: var(--spacing-xs);
     border-radius: var(--border-radius);
     transition: var(--transition-fast);
+    z-index: 1;
 }
 
 .password-toggle:hover {
@@ -314,7 +351,8 @@ body {
     display: flex;
     align-items: flex-start;
     gap: var(--spacing-md);
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+    margin-top: var(--spacing-sm);
 }
 
 .checkbox {
@@ -388,7 +426,7 @@ body {
     color: var(--text-muted);
     text-align: center;
     line-height: 1.4;
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
 }
 
 .terms-link {
@@ -416,22 +454,6 @@ body {
 
 .signin-link a:hover {
     color: var(--accent-color);
-}
-
-/* Error Messages */
-.error-message {
-    color: var(--danger-color);
-    font-size: var(--font-size-xs);
-    margin-top: var(--spacing-xs);
-    display: none;
-}
-
-.error-message.show {
-    display: block;
-}
-
-.form-input.error {
-    border-color: var(--danger-color);
 }
 
 /* Loading Overlay */
@@ -603,6 +625,22 @@ body {
     .alert {
         min-width: auto;
     }
+
+    /* Мобильная оптимизация для полей */
+    .form-group {
+        min-height: calc(2.75rem + 1rem);
+    }
+
+    .form-input {
+        height: 2.75rem;
+        padding: var(--spacing-sm) var(--spacing-md);
+    }
+
+    .error-message {
+        top: calc(2.75rem + 0.25rem);
+        height: 1rem;
+        font-size: 0.7rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -634,14 +672,6 @@ body {
         max-width: none;
     }
 }
-.benefit-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-}
-
-.benefit-icon svg {
-    width: 15px;
-    height: 15px;
+.google-btn {
+    text-decoration: none;
 }

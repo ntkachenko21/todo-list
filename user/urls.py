@@ -1,11 +1,10 @@
-from django.urls import path
+from django.urls import include, path
 
-from user.views import visits
+from user.views import CustomUserCreateView
 
 urlpatterns = [
-    path("login/", visits, name="login"),
-    path("logout/", visits, name="logout"),
-    path("signup/", visits, name="signup"),
+    path("", include("django.contrib.auth.urls")),
+    path("signup/", CustomUserCreateView.as_view(), name="signup"),
 ]
 
 app_name = "user"

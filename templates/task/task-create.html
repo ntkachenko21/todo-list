@@ -36,21 +36,21 @@
                     </h3>
                     
                     <div class="form-group">
-                        <label for="{{ form.content.id_for_label }}" class="form-label">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">
                             <i class="fas fa-align-left"></i>
                             Task Description
                         </label>
                         <div class="input-wrapper">
-                            <textarea name="{{ form.content.name }}" 
-                                      id="{{ form.content.id_for_label }}" 
+                            <textarea name="{{ form.description.name }}" 
+                                      id="{{ form.description.id_for_label }}" 
                                       class="form-control"
                                       rows="4"
                                       placeholder="Describe what needs to be done..."
-                                      required>{% if form.content.value %}{{ form.content.value }}{% endif %}</textarea>
+                                      required>{% if form.description.value %}{{ form.description.value }}{% endif %}</textarea>
                         </div>
-                        {% if form.content.errors %}
+                        {% if form.description.errors %}
                             <div class="form-error">
-                                {% for error in form.content.errors %}
+                                {% for error in form.description.errors %}
                                     <span><i class="fas fa-exclamation-circle"></i> {{ error }}</span>
                                 {% endfor %}
                             </div>

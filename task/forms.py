@@ -8,13 +8,13 @@ class TaskUpdateForm(ModelForm):
     class Meta:
         model = Task
         fields = (
-            "content",
+            "description",
             "deadline",
             "is_done",
             "tags",
         )
         widgets = {
-            "content": forms.Textarea(
+            "description": forms.Textarea(
                 attrs={
                     "class": "form-control",
                     "rows": 4,
@@ -38,12 +38,12 @@ class TaskForm(ModelForm):
     class Meta:
         model = Task
         fields = (
-            "content",
+            "description",
             "deadline",
             "tags",
         )
         widgets = {
-            "content": forms.Textarea(
+            "description": forms.Textarea(
                 attrs={
                     "class": "form-control",
                     "rows": 4,

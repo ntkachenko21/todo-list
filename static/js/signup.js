@@ -14,7 +14,7 @@ function initializeLoginPage() {
 // ===== PASSWORD TOGGLE FUNCTIONALITY =====
 function initializePasswordToggle() {
     const passwordToggle = document.getElementById("passwordToggle")
-    const passwordInput = document.getElementById("password")
+    const passwordInput = document.getElementById("id_password1")
     
     if (passwordToggle && passwordInput) {
         passwordToggle.addEventListener("click", () => {
@@ -37,73 +37,80 @@ function togglePasswordVisibility(passwordInput, toggleBtn) {
 
 // ===== FORM VALIDATION =====
 function initializeFormValidation() {
-    const emailInput = document.getElementById("email")
-    const passwordInput = document.getElementById("password")
-    
+    const emailInput = document.getElementById("id_email");
+    const passwordInput = document.getElementById("id_password1");
+    const password2Input = document.getElementById("id_password2");
+
     if (emailInput) {
-        emailInput.addEventListener("blur", () => validateEmail(emailInput))
-        emailInput.addEventListener("input", () => clearError(emailInput, "emailError"))
+        // При потере фокуса - валидируем
+        emailInput.addEventListener("blur", () => validateEmail(emailInput));
+        // При вводе - убираем ошибку
+        emailInput.addEventListener("input", () => clearError(emailInput));
     }
-    
     if (passwordInput) {
-        passwordInput.addEventListener("blur", () => validatePassword(passwordInput))
-        passwordInput.addEventListener("input", () => clearError(passwordInput, "passwordError"))
+        passwordInput.addEventListener("blur", () => validatePassword(passwordInput));
+        passwordInput.addEventListener("input", () => clearError(passwordInput));
+    }
+    if (password2Input) {
+        // Для поля подтверждения пароля просто убираем ошибку при вводе
+        password2Input.addEventListener("input", () => clearError(password2Input));
     }
 }
 
 function validateEmail(emailInput) {
-    const email = emailInput.value.trim()
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    const errorElement = document.getElementById("emailError")
-    
+    const email = emailInput.value.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     if (!email) {
-        showError(emailInput, errorElement, "Email is required")
-        return false
+        showError(emailInput, "Email is required");
+        return false;
     }
-    
     if (!emailRegex.test(email)) {
-        showError(emailInput, errorElement, "Please enter a valid email address")
-        return false
+        showError(emailInput, "Please enter a valid email address");
+        return false;
     }
-    
-    clearError(emailInput, "emailError")
-    return true
+    clearError(emailInput);
+    return true;
 }
 
 function validatePassword(passwordInput) {
-    const password = passwordInput.value
-    const errorElement = document.getElementById("passwordError")
-    
+    const password = passwordInput.value;
+
     if (!password) {
-        showError(passwordInput, errorElement, "Password is required")
-        return false
+        showError(passwordInput, "Password is required");
+        return false;
     }
-    
     if (password.length < 8) {
-        showError(passwordInput, errorElement, "Password must be at least 8 characters long")
-        return false
+        showError(passwordInput, "Password must be at least 8 characters long");
+        return false;
     }
-    
-    clearError(passwordInput, "passwordError")
-    return true
+    clearError(passwordInput);
+    return true;
 }
 
-function showError(inputElement, errorElement, message) {
-    inputElement.classList.add("error")
-    if (errorElement) {
-        errorElement.textContent = message
-        errorElement.classList.add("show")
+// Упрощенная и правильная функция показа ошибки
+function showError(inputElement, message) {
+    inputElement.classList.add("error");
+
+    const errorContainer = inputElement.closest('.form-group').querySelector('.error-message');
+
+
+    if (errorContainer) {
+        errorContainer.textContent = message;
+    } else {
+        console.error('ERROR: .error-message container not found!');
     }
 }
 
-function clearError(inputElement, errorId) {
-    inputElement.classList.remove("error")
-    const errorElement = document.getElementById(errorId)
-    if (errorElement) {
-        errorElement.classList.remove("show")
-        errorElement.textContent = ""
+// Упрощенная и правильная функция очистки ошибки
+function clearError(inputElement) {
+    inputElement.classList.remove("error");
+    const errorContainer = inputElement.closest('.form-group').querySelector('.error-message');
+    if (errorContainer) {
+        errorContainer.textContent = "";
     }
 }
+
 
 // ===== GOOGLE SIGNUP =====
 function initializeGoogleSignup() {
@@ -142,65 +149,115 @@ function initializeFormSubmission() {
 
 function handleFormSubmission(event) {
     event.preventDefault()
-    
-    const emailInput = document.getElementById("email")
-    const passwordInput = document.getElementById("password")
+
+    // const emailInput = document.getElementById("id_email")
+    // const passwordInput = document.getElementById("id_password1")
     const signupBtn = document.getElementById("signupBtn")
-    
-    // Validate form
-    const isEmailValid = validateEmail(emailInput)
-    const isPasswordValid = validatePassword(passwordInput)
-    
-    if (!isEmailValid || !isPasswordValid) {
-        showAlert("Please fix the errors above", "error")
-        return
-    }
-    
+
+    // // Validate form
+    // const isEmailValid = validateEmail(emailInput)
+    // const isPasswordValid = validatePassword(passwordInput)
+    //
+    // if (!isEmailValid || !isPasswordValid) {
+    //     showAlert("Please fix the errors above", "error")
+    //     return
+    // }
+
     // Show loading state
     setButtonLoading(signupBtn, true)
     showLoadingOverlay("Creating your account...")
-    
+
     // Get form data
     const formData = new FormData(event.target)
-    
+
     // For Django integration, submit via fetch
     submitFormData(formData, signupBtn)
 }
 
 function submitFormData(formData, submitBtn) {
-    // Example Django integration
     fetch(window.location.href, {
         method: 'POST',
         body: formData,
         headers: {
-            'X-CSRFToken': getCsrfToken()
+            'X-CSRFToken': getCsrfToken(),
+            'X-Requested-With': 'XMLHttpRequest'
         }
     })
     .then(response => {
-        if (response.ok) {
-            return response.json()
+        // Проверяем, что ответ действительно JSON
+        const contentType = response.headers.get('content-type');
+
+        if (!contentType || !contentType.includes('application/json')) {
+            throw new Error('Response is not JSON');
         }
-        throw new Error('Network response was not ok')
+
+        return response.json();
     })
     .then(data => {
         hideLoadingOverlay()
         setButtonLoading(submitBtn, false)
-        
+
         if (data.success) {
             showAlert("Account created successfully! Redirecting...", "success")
             setTimeout(() => {
                 window.location.href = data.redirect_url || '/dashboard/'
             }, 1500)
         } else {
-            showAlert(data.error || "Signup failed. Please try again.", "error")
+            handleFormErrors(data.errors)
         }
     })
     .catch(error => {
-        console.error('Error:', error)
+        console.error('=== FETCH ERROR ===');
+        console.error('Error details:', error)
         hideLoadingOverlay()
         setButtonLoading(submitBtn, false)
         showAlert("An error occurred. Please try again.", "error")
     })
+}
+
+function handleFormErrors(errors) {
+    clearAllErrors();
+
+    let parsedErrors;
+    if (typeof errors === 'string') {
+        try {
+            parsedErrors = JSON.parse(errors);
+        } catch (e) {
+            console.error('Failed to parse errors JSON:', e);
+            parsedErrors = {__all__: [errors]};
+        }
+    } else {
+        parsedErrors = errors;
+    }
+
+    // Обработка общих ошибок формы
+    if (parsedErrors.__all__) {
+        const errorMessage = Array.isArray(parsedErrors.__all__)
+            ? parsedErrors.__all__[0].message || parsedErrors.__all__[0]
+            : parsedErrors.__all__;
+        showAlert(errorMessage, "error");
+    }
+
+    // Обработка ошибок конкретных полей
+    for (const fieldName in parsedErrors) {
+        if (fieldName !== '__all__') {
+            const inputElement = document.getElementById(`id_${fieldName}`);
+
+            if (inputElement) {
+                const errorMessage = Array.isArray(parsedErrors[fieldName])
+                    ? parsedErrors[fieldName][0].message || parsedErrors[fieldName][0]
+                    : parsedErrors[fieldName];
+                showError(inputElement, errorMessage);
+            } else {
+                console.warn(`Input element not found for field: id_${fieldName}`);
+            }
+        }
+    }
+}
+
+function clearAllErrors() {
+    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+    document.querySelectorAll('input.error').forEach(el => el.classList.remove('error'));
 }
 
 function setButtonLoading(button, isLoading) {

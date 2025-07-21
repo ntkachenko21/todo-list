@@ -31,7 +31,6 @@
                     </div>
                 </a>
             </li>
-
             <li class="nav-item">
                 <a href="{% url 'task:tag-list' %}"
                    class="nav-link {% if 'tag' in request.resolver_match.url_name %}active{% endif %}"
@@ -45,7 +44,6 @@
                     </div>
                 </a>
             </li>
-
             <!-- Placeholder for future menu items -->
             <li class="nav-item nav-item-disabled">
                 <a href="#" class="nav-link" data-tooltip="Statistics (Coming Soon)">
@@ -59,7 +57,6 @@
                     </div>
                 </a>
             </li>
-
             <li class="nav-item nav-item-disabled">
                 <a href="#" class="nav-link" data-tooltip="Settings (Coming Soon)">
                     <div class="nav-link-content">
@@ -77,22 +74,85 @@
 
     <!-- Sidebar Footer -->
     <div class="sidebar-footer">
-        <div class="user-profile">
-          <a href="{% url 'login' %}">
-            <div class="user-avatar">
-                <i class="fas fa-user-circle"></i>
+        {% if user.is_authenticated %}
+            <!-- Зарегистрированный пользователь -->
+            <div class="user-profile authenticated">
+                <a href="{% url 'account_login' %}" class="user-profile-link" title="Go to Profile">
+                    <div class="user-avatar">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="{{ user.get_full_name|default:user.username }}" class="avatar-img">
+                        {% else %}
+                            <i class="fas fa-user-circle"></i>
+                        {% endif %}
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">{{ user.get_full_name|default:user.username|truncatechars:15 }}</span>
+                        <span class="user-status">
+                            {% if user.profile.is_premium %}
+                                <i class="fas fa-crown"></i> Premium
+                            {% else %}
+                                Free Plan
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="user-actions">
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                </a>
+
+                <!-- Dropdown Menu для зарегистрированного пользователя -->
+                <div class="user-dropdown">
+                    <button class="user-menu-btn" title="User menu" onclick="toggleUserMenu()">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div class="user-menu-dropdown" id="userMenuDropdown">
+                        <a href="{% url 'account_login' %}" class="dropdown-item">
+                            <i class="fas fa-user"></i>
+                            <span>Profile</span>
+                        </a>
+                        <a href="{% url 'account_login' %}" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            <span>Settings</span>
+                        </a>
+                        {% if not user.profile.is_premium %}
+                        <a href="{% url 'account_login' %}" class="dropdown-item upgrade-item">
+                            <i class="fas fa-crown"></i>
+                            <span>Upgrade to Pro</span>
+                        </a>
+                        {% endif %}
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url 'account_logout' %}" class="dropdown-item logout-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="user-info">
-                <span class="user-name">Welcome back!</span>
-                <span class="user-status">Free Plan</span>
+        {% else %}
+            <!-- Незарегистрированный пользователь -->
+            <div class="user-profile guest">
+                <div class="guest-welcome">
+                    <div class="guest-avatar">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="guest-info">
+                        <span class="guest-title">Welcome!</span>
+                        <span class="guest-subtitle">Join TaskFlow</span>
+                    </div>
+                </div>
+
+                <div class="guest-actions">
+                    <a href="{% url 'user:signup' %}" class="btn-signup" title="Sign Up">
+                        <i class="fas fa-user-plus"></i>
+                        <span class="btn-text">Sign Up</span>
+                    </a>
+                    <a href="{% url 'account_login' %}" class="btn-login" title="Login">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span class="btn-text">Login</span>
+                    </a>
+                </div>
             </div>
-            <div class="user-menu">
-                <button class="user-menu-btn" title="User menu">
-                    <i class="fas fa-ellipsis-v"></i>
-                </button>
-            </div>
-          </a>  
-        </div>
+        {% endif %}
     </div>
 
     <!-- Mobile Toggle -->
@@ -103,3 +163,21 @@
 
 <!-- Sidebar Overlay for Mobile -->
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- JavaScript для dropdown меню -->
+<script>
+function toggleUserMenu() {
+    const dropdown = document.getElementById('userMenuDropdown');
+    dropdown.classList.toggle('show');
+}
+
+// Закрытие dropdown при клике вне его
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('userMenuDropdown');
+    const menuBtn = document.querySelector('.user-menu-btn');
+
+    if (dropdown && !dropdown.contains(event.target) && !menuBtn.contains(event.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+</script>
